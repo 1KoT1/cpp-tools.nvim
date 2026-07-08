@@ -1,0 +1,54 @@
+*cpp-tools.txt* Collection of tools for coding on C++ in Neovim
+
+==============================================================================
+CONTENTS                                                     *cpp-tools*
+
+  1. Introduction .................... |cpp-tools-introduction|
+  2. Installation .................... |cpp-tools-installation|
+  3. Configuration .................. |cpp-tools-configuration|
+  4. Commands ....................... |cpp-tools-commands|
+
+==============================================================================
+1. INTRODUCTION                                   *cpp-tools-introduction*
+
+cpp-tools.nvim is a Neovim plugin that provides a collection of useful tools
+for C++ development. It includes utilities for:
+
+
+==============================================================================
+2. INSTALLATION                                   *cpp-tools-installation*
+
+Using lazy.nvim:
+>
+  {
+    "1KoT1/cpp-tools.nvim",
+    opts = {},
+  }
+<
+
+Using packer.nvim:
+>
+  use {
+    "1KoT1/cpp-tools.nvim",
+    config = function()
+      require("cpp-tools").setup({})
+    end,
+  }
+<
+
+==============================================================================
+3. CONFIGURATION                                 *cpp-tools-configuration*
+
+TODO: Configuration will be documented here.
+You can pass options to the setup function:
+>
+  require("cpp-tools").setup({})
+<
+
+==============================================================================
+4. COMMANDS                                       *cpp-tools-commands*
+
+TODO: Commands will be documented here.
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
