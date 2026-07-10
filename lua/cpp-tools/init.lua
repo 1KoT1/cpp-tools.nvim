@@ -14,6 +14,7 @@ M.utils = require("cpp-tools.utils")
 --- @param opts table|nil User configuration options
 function M.setup(opts)
 	M.config.setup(opts)
+	M.tools.setup()
 end
 
 return M
