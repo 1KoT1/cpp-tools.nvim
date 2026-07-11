@@ -13,7 +13,7 @@ M.utils = require("cpp-tools.utils")
 --- Setup the plugin with user configuration
 --- @param opts table|nil User configuration options
 function M.setup(opts)
-  M.config.setup(opts)
+	M.config.setup(opts)
 end
 
 return M
