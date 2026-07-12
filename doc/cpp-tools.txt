@@ -5,8 +5,10 @@ CONTENTS                                                     *cpp-tools*
 
   1. Introduction .................... |cpp-tools-introduction|
   2. Installation .................... |cpp-tools-installation|
-  3. Configuration .................. |cpp-tools-configuration|
-  4. Commands ....................... |cpp-tools-commands|
+  3. Mapping ......................... |cpp-tools-mapping|
+  4. Tools ........................... |cpp-tools-tools|
+  5. Customisation ................... |cpp-tools-customisation|
+  6. Commands ........................ |cpp-tools-commands|
 
 ==============================================================================
 1. INTRODUCTION                                   *cpp-tools-introduction*
@@ -14,6 +16,7 @@ CONTENTS                                                     *cpp-tools*
 cpp-tools.nvim is a Neovim plugin that provides a collection of useful tools
 for C++ development. It includes utilities for:
 
+- Creating C++ class skeletons with header and source files
 
 ==============================================================================
 2. INSTALLATION                                   *cpp-tools-installation*
@@ -37,18 +40,143 @@ Using packer.nvim:
 <
 
 ==============================================================================
-3. CONFIGURATION                                 *cpp-tools-configuration*
+3. MAPPING                                           *cpp-tools-mapping*
 
-TODO: Configuration will be documented here.
-You can pass options to the setup function:
+The plugin intentionally does not define any keymaps to avoid conflicts with
+your existing configuration. A common mapping is:
+
 >
-  require("cpp-tools").setup({})
-<
+  vim.keymap.set("n", "<leader>c", ":CppCreateClass<CR>")
 
 ==============================================================================
-4. COMMANDS                                       *cpp-tools-commands*
+4. TOOLS                                             *cpp-tools-tools*
 
-TODO: Commands will be documented here.
+4.1  Create Class                                           *cpp-tools-create-class*
+:CppCreateClass                                                *:CppCreateClass*
+
+Why: Quickly scaffold a new C++ class with creating header and source files.
+
+Usage: Write on a new line
+>
+    create class [ns1::[ns2::[...]]]ClassName
+<
+Then run |:CppCreateClass|. For example:
+>
+    create class ns1::ns2::MyClass
+<
+This generates two files using the configured paths:
+>
+    <headers_dir>/<header_relative_path>
+    <sources_dir>/<source_relative_path>
+<
+With default settings:
+>
+    includes/ns1/ns2/MyClass.h
+    src/ns1/ns2/MyClass.cpp
+<
+
+After creating the files, the command removes the `create class …` line from the
+buffer and opens the fresh header file for editing.
+
+Customisation: You can adapt path resolution and generated file content to
+your project style. See |cpp-tools-customisation-create-class|.
+
+==============================================================================
+5. CUSTOMISATION                                     *cpp-tools-customisation*
+
+You can adapt all tools to your project conventions by replacing callback
+functions in the `customisations` table passed to `setup()`.
+
+5.1  Common options                               *customisation-common*
+
+These callbacks are shared across tools and control project layout and root
+detection. All of them are optional; if omitted, built-in defaults are used.
+
+- `header_relative_path_fn(namespaces, class_name) -> string`
+  Computes the path of the header relative to the headers base directory.
+  Must return a string such as `"ns1/ns2/MyClass.h"`. Usually used in the
+	#include directive.
+  Default: `require("cpp-tools.defaults").header_relative_path`
+
+- `headers_dir_fn(project_root) -> string`
+  Computes the absolute path to the headers base directory.
+  Must return a string representing an absolute directory path, for example
+  `"/project/includes"`.
+  Default: `require("cpp-tools.defaults").headers_dir`
+
+- `source_relative_path_fn(namespaces, class_name) -> string`
+  Computes the path of the source file relative to the sources base directory.
+  Must return a string such as `"ns1/ns2/MyClass.cpp"`.
+  Default: `require("cpp-tools.defaults").source_relative_path`
+
+- `sources_dir_fn(project_root) -> string`
+  Computes the absolute path to the sources base directory.
+  Must return a string representing an absolute directory path, for example
+  `"/project/src"`.
+  Default: `require("cpp-tools.defaults").sources_dir`
+
+- `get_project_root_fn() -> string`
+  Determines the project root directory.
+  Must return an absolute path to the project root. If the root cannot be
+  determined, raise an error with a human-readable message explaining why.
+  If this function raises an error, the error is shown via `vim.notify()` at
+  ERROR level and no files are created.
+  Default: `require("cpp-tools.defaults").get_project_root` — searches for
+  `.git`, `CMakeLists.txt`, `Makefile`, `.clangd`.
+
+5.2  Create Class                        *customisation-create-class*
+
+For the Create Class tool you can additionally override content generation.
+
+- `fill_header_content_fn(namespaces, class_name, header_path) -> nil`
+  Generates and writes the header file content.
+  Must write the final content directly to `header_path`. You do not need to
+  create the parent directory; the tool creates it automatically.
+  Default: `require("cpp-tools.defaults").create_class.fill_header_content`
+  — generates a Google-style include guard, class skeleton with
+  constructor/destructor declarations, and namespace wrapping.
+
+- `fill_source_content_fn(namespaces, class_name, header_path_for_include, full_source_path) -> nil`
+  Generates and writes the source file content.
+  Must write the final content directly to `full_source_path`. Use
+  `header_path_for_include` for the `#include` directive so it matches the
+  generated header location.
+  Default: `require("cpp-tools.defaults").create_class.fill_source_content`
+  — generates an `#include` directive, namespace wrapping.
+
+Create Class also uses the |customisation-common| options above.
+
+Example:
+>
+  require("cpp-tools").setup({
+    customisations = {
+      header_relative_path_fn = function(namespaces, class_name)
+        return table.concat(namespaces, "/") .. "/" .. class_name .. ".h"
+      end,
+      headers_dir_fn = function(project_root)
+        return project_root .. "/include"
+      end,
+      source_relative_path_fn = function(namespaces, class_name)
+        return table.concat(namespaces, "/") .. "/" .. class_name .. ".cpp"
+      end,
+      sources_dir_fn = function(project_root)
+        return project_root .. "/lib"
+      end,
+      get_project_root_fn = function()
+        return "/absolute/path/to/project"
+      end,
+      create_class = {
+        fill_header_content_fn = function(namespaces, class_name, header_path)
+          -- generate header content and write it to header_path
+        end,
+        fill_source_content_fn = function(namespaces, class_name, header_path_for_include, full_source_path)
+          -- generate source content and write it to full_source_path
+        end,
+      },
+    },
+  })
+<
+
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:
