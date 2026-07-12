@@ -125,11 +125,25 @@ function tests.test_is_cpp_buffer()
 end
 
 -- Run tests
+local failed_tests = {}
 print("Running cpp-tools.nvim tests...")
 for name, fn in pairs(tests) do
-  local ok, err = pcall(fn)
-  if not ok then
-    print("✗ " .. name .. ": " .. tostring(err))
-  end
+	local ok, err = pcall(fn)
+	if not ok then
+		msg = "✗ " .. name .. ": " .. tostring(err)
+		failed_tests[#failed_tests] = msg
+		print(msg)
+	end
 end
 print("Done.")
+if #failed_tests == 0 then
+	print("============")
+	print("Success")
+else
+	print("============")
+	print("Failed tests")
+	for _, msg in pairs(failed_tests) do
+		print(msg)
+	end
+end
+print("")
