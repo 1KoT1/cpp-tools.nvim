@@ -118,6 +118,12 @@ for name, fn in pairs(create_class_tests) do
 	tests[name] = fn
 end
 
+-- Load CMake integration tests (only if cmake is available)
+local cmake_integration_tests = dofile(test_dir .. "integration/cmake_integration_spec.lua")
+for name, fn in pairs(cmake_integration_tests) do
+	tests[name] = fn
+end
+
 -- Run tests
 local failed_tests = {}
 print("Running cpp-tools.nvim tests...")
@@ -126,7 +132,8 @@ for name, fn in pairs(tests) do
 	if ok then
 		print("✓ "..name)
 	else
-		failed_tests[#failed_tests] = msg
+		local msg = "✗ " .. name .. ": " .. tostring(err)
+		failed_tests[#failed_tests + 1] = msg
 		print(msg)
 	end
 end

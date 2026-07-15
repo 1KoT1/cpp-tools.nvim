@@ -12,6 +12,7 @@ local defaults = {
 
 	--- Filetypes that the plugin activates for
 	filetypes = { "cpp", "c", "h", "hpp" },
+	enable_cmake_integration = true,
 
 	customisations = {
 		--- Custom function to compute path relative to the headers directory.
@@ -59,7 +60,7 @@ local defaults = {
 }
 
 --- Current merged configuration
-M.options = {}
+M.options = defaults
 
 --- Setup configuration, merging user options with defaults
 --- @param opts table|nil User configuration options

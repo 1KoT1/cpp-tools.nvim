@@ -126,6 +126,16 @@ function M.run()
 	local current_line = vim.fn.line(".")
 	vim.api.nvim_buf_set_lines(0, current_line - 1, current_line, false, {})
 
+	-- Attempt to integrate the new source file into CMake.
+	local ok, err = pcall(function()
+		require("cpp-tools.tools.cmake").integrate_create_class(project_root, source_path)
+	end)
+	if not ok then
+		vim.notify(
+			"cpp-tools.nvim::create-class: CMake integration failed: " .. tostring(err),
+			vim.log.levels.WARN
+		)
+	end
 
 	-- Open the header file in the current window
 	vim.cmd("edit " .. vim.fn.fnameescape(header_path))
