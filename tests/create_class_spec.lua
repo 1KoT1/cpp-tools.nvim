@@ -101,8 +101,6 @@ function tests.test_create_class_main_scenario()
 		"Source line 1 should #include the header, got: "
 		.. tostring(source_lines[1])
 	)
-
-	print("✓ test_create_class_main_scenario")
 end
 
 function tests.test_create_class_main_scenario_with_namespace()
@@ -192,8 +190,6 @@ function tests.test_create_class_main_scenario_with_namespace()
 	assert(src_has_ns2_close, "Source should close namespace ns2")
 
 	tmp:destroy()
-
-	print("✓ test_create_class_main_scenario_with_namespace")
 end
 
 function tests.test_customisation_get_project_root_fn()
@@ -242,8 +238,6 @@ function tests.test_customisation_get_project_root_fn()
 	)
 
 	tmp:destroy()
-
-	print("✓ test_customisation_get_project_root_fn")
 end
 
 function tests.test_customisation_headers_dir_fn()
@@ -298,7 +292,6 @@ function tests.test_customisation_headers_dir_fn()
 
 
 	tmp:destroy()
-	print("✓ test_customisation_headers_dir_fn")
 end
 
 function tests.test_customisation_sources_dir_fn()
@@ -352,8 +345,6 @@ function tests.test_customisation_sources_dir_fn()
 	)
 
 	tmp:destroy()
-
-	print("✓ test_customisation_sources_dir_fn")
 end
 
 function tests.test_customisation_source_relative_path_fn()
@@ -405,8 +396,6 @@ function tests.test_customisation_source_relative_path_fn()
 	)
 
 	tmp:destroy()
-
-	print("✓ test_customisation_source_relative_path_fn")
 end
 
 function tests.test_customisation_fill_header_content_fn()
@@ -464,8 +453,6 @@ function tests.test_customisation_fill_header_content_fn()
 		header_lines[1] == "// Custom header for MyClass",
 		"Header should contain custom content, got: " .. tostring(header_lines[1])
 	)
-
-	print("✓ test_customisation_fill_header_content_fn")
 end
 
 function tests.test_customisation_fill_source_content_fn()
@@ -523,8 +510,6 @@ function tests.test_customisation_fill_source_content_fn()
 		source_lines[1] == "// Custom source for MyClass",
 		"Source should contain custom content, got: " .. tostring(source_lines[1])
 	)
-
-	print("✓ test_customisation_fill_source_content_fn")
 end
 
 function tests.test_customisation_get_project_root_fn_error_published()
@@ -604,7 +589,6 @@ function tests.test_customisation_get_project_root_fn_error_published()
 	)
 
 	tmp:destroy()
-	print("✓ test_customisation_get_project_root_fn_error_published")
 end
 
 return tests

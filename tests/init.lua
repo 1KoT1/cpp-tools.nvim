@@ -28,8 +28,6 @@ function tests.test_temp_dir()
 
 	-- Calling :destroy() again should be safe (no crash)
 	t:destroy()
-
-	print("✓ test_temp_dir")
 end
 
 function tests.test_temp_dir_gc_cleanup()
@@ -46,8 +44,6 @@ function tests.test_temp_dir_gc_cleanup()
 	collectgarbage()
 	-- After GC the proxy's __gc should have removed the directory
 	assert(vim.fn.isdirectory(path) == 0, "directory should be removed after GC: " .. tostring(path))
-
-	print("✓ test_temp_dir_gc_cleanup")
 end
 
 function tests.test_config_defaults()
@@ -55,7 +51,6 @@ function tests.test_config_defaults()
 	config.setup({})
 	assert(config.options.debug == false, "debug should default to false")
 	assert(type(config.options.filetypes) == "table", "filetypes should be a table")
-	print("✓ test_config_defaults")
 end
 
 function tests.test_config_defaults_with_one_replace()
@@ -100,8 +95,6 @@ function tests.test_config_defaults_with_one_replace()
 		config.options.customisations.create_class.fill_source_content_fn == defaults_f.create_class.fill_source_content,
 		"fill_source_content_fn should be the default function"
 	)
-
-	print("✓ test_config_defaults_with_one_replace")
 end
 
 
@@ -109,7 +102,6 @@ function tests.test_config_custom()
 	local config = require("cpp-tools.config")
 	config.setup({ debug = true })
 	assert(config.options.debug == true, "debug should be true")
-	print("✓ test_config_custom")
 end
 
 function tests.test_customisations_header_relative_path_fn()
@@ -137,8 +129,6 @@ function tests.test_customisations_header_relative_path_fn()
 	-- Verify it works as expected
 	local rel = config.options.customisations.header_relative_path_fn({ "ns1", "ns2" }, "MyClass")
 	assert(rel == "custom/ns1/ns2/MyClass.hpp", "custom function should produce 'custom/ns1/ns2/MyClass.hpp', got: " .. tostring(rel))
-
-	print("✓ test_customisations_header_relative_path_fn")
 end
 
 -- Load create class tests
@@ -152,7 +142,9 @@ local failed_tests = {}
 print("Running cpp-tools.nvim tests...")
 for name, fn in pairs(tests) do
 	local ok, err = pcall(fn)
-	if not ok then
+	if ok then
+		print("✓ "..name)
+	else
 		failed_tests[#failed_tests] = msg
 		print(msg)
 	end
