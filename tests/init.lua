@@ -10,40 +10,21 @@ package.path = lua_dir .. "?.lua;"
 .. lua_dir .. "?/init.lua;"
 .. package.path
 
--- Load shared test helpers (TempDir, etc.)
-TempDir = dofile(test_dir .. "helpers.lua")
+-- Load shared test helpers (with_tmp_dir, etc.)
+with_tmp_dir = dofile(test_dir .. "helpers.lua")
 
 local tests = {}
 
 function tests.test_temp_dir()
+	local path = nil
 	-- Create a TempDir and verify the directory exists
-	local t = TempDir.new()
-	local path = t:path()
-	assert(type(path) == "string" and #path > 0, "TempDir:path() should return a non-empty string")
-	assert(vim.fn.isdirectory(path) == 1, "TempDir directory should exist on disk: " .. path)
+	with_tmp_dir(function(tmpdir)
+		path = tmpdir
+		assert(type(path) == "string" and #path > 0, "TempDir should return a non-empty string")
+		assert(vim.fn.isdirectory(path) == 1, "TempDir directory should exist on disk: " .. path)
+	end)
 
-	-- Destroy explicitly and verify it is removed
-	t:destroy()
-	assert(vim.fn.isdirectory(path) == 0, "TempDir directory should be removed after :destroy()")
-
-	-- Calling :destroy() again should be safe (no crash)
-	t:destroy()
-end
-
-function tests.test_temp_dir_gc_cleanup()
-	-- Verify that the __gc proxy works: create a TempDir, drop the reference,
-	-- force GC, and check the directory disappears.
-	local path
-	do
-		local t = TempDir.new()
-		path = t:path()
-		assert(vim.fn.isdirectory(path) == 1, "directory should exist before GC")
-	end
-	-- Drop reference and force collection
-	collectgarbage()
-	collectgarbage()
-	-- After GC the proxy's __gc should have removed the directory
-	assert(vim.fn.isdirectory(path) == 0, "directory should be removed after GC: " .. tostring(path))
+	assert(vim.fn.isdirectory(path) == 0, "TempDir directory should be removed after destroy")
 end
 
 function tests.test_config_defaults()
