@@ -35,6 +35,16 @@ local defaults = {
 		--- Returns e.g. "/project/src"
 		sources_dir_fn = defaults_f.sources_dir,
 
+		--- Custom function to compute path relative to the tests directory.
+		--- Signature: (namespaces: string[], module_name: string) -> string
+		--- Returns e.g. "ns1/ns2/MyClassTests.cpp"
+		test_relative_path_fn = defaults_f.test_relative_path,
+
+		--- Custom function to compute the tests base directory.
+		--- Signature: (project_root: string) -> string
+		--- Returns e.g. "/project/tests"
+		tests_dir_fn = defaults_f.tests_dir,
+
 		--- Custom function to determine the project root directory.
 		--- Signature: () -> string
 		--- Returns the absolute path to the project root. Raises an error if the
@@ -55,6 +65,21 @@ local defaults = {
 			--- Writes the source file directly at source_path. Default implements an
 			--- #include directive, namespace wrapping, and empty constructor/destructor stubs.
 			fill_source_content_fn = defaults_f.create_class.fill_source_content,
+		},
+
+		add_gtest = {
+			--- Custom function to prompt the user for the test module name.
+			--- Signature: (default_value: string) -> string
+			--- Returns the module name entered by the user, or empty string if cancelled.
+			--- Default calls vim.fn.input. Override this for testing.
+			prompt_module_name_fn = defaults_f.add_gtest.prompt_module_name,
+
+			--- Custom function to generate and write the Google Test source file content.
+			--- Signature: (header_relative_path: string, module_namespaces: string[], module_name: string, full_test_path: string) -> nil
+			--- Writes the test file directly at full_test_path. Default implements
+			--- an #include of the class header, gtest include, namespace wrapping,
+			--- and a simple TEST() stub.
+			fill_test_content_fn = defaults_f.add_gtest.fill_test_content,
 		}
 	},
 }

@@ -1,6 +1,57 @@
 
 local M = {}
 
+M.add_gtest = {}
+
+--- Default function to prompt the user for the test module name.
+--- Calls vim.fn.input to get a value from the user.
+--- Override in customisations.add_gtest.prompt_module_name_fn for testing or
+--- custom input behaviour.
+--- @param default_value string The default module name shown in the prompt
+--- @return string The module name entered by the user, or empty string if cancelled
+function M.add_gtest.prompt_module_name(default_value)
+	return vim.fn.input("Test module name: ", default_value)
+end
+
+--- Default Google Test source content generation function.
+--- Generates a C++ source file with #include of the class header, gtest include,
+--- namespace wrapping, and a simple TEST() stub.
+--- @param header_relative_path string Path for the #include directive (e.g. "ns1/ns2/MyClass.h")
+--- @param module_namespaces string[] Namespace parts from the module name
+--- @param module_name string The test suite name (last component of module name)
+--- @param full_test_path string Absolute path to write the test file
+function M.add_gtest.fill_test_content(header_relative_path, module_namespaces, module_name, full_test_path)
+	local lines = {}
+	table.insert(lines, '#include "' .. header_relative_path .. '"')
+	table.insert(lines, "")
+	table.insert(lines, '#include <gtest/gtest.h>')
+	table.insert(lines, "")
+
+	-- Opening namespace blocks
+	for _, ns in ipairs(module_namespaces) do
+		table.insert(lines, "namespace " .. ns .. " {")
+	end
+	if #module_namespaces > 0 then
+		table.insert(lines, "")
+	end
+
+	-- Test stub
+	table.insert(lines, "TEST(" .. module_name .. ", Test1) {")
+	table.insert(lines, "\t// TODO: implement test")
+	table.insert(lines, "}")
+
+	-- Closing namespace blocks (reverse order)
+	if #module_namespaces > 0 then
+		table.insert(lines, "")
+		for i = #module_namespaces, 1, -1 do
+			table.insert(lines, "}  // namespace " .. module_namespaces[i])
+		end
+	end
+
+	table.insert(lines, "")
+	vim.fn.writefile(lines, full_test_path)
+end
+
 --- Default header relative path function.
 --- Computes path relative to the headers directory.
 --- @param namespaces string[] List of namespace names
@@ -33,6 +84,28 @@ end
 --- @return string Sources directory path (e.g., "/project/src")
 function M.sources_dir(project_root)
 	return project_root .. "/src"
+end
+
+--- Default test relative path function.
+--- Computes path relative to the tests directory.
+--- @param namespaces string[] List of namespace parts
+--- @param module_name string The test module name (last component)
+--- @return string Relative path (e.g., "ns1/ns2/MyClassTests.cpp")
+function M.test_relative_path(namespaces, module_name)
+	local parts = {}
+	for _, ns in ipairs(namespaces) do
+		table.insert(parts, ns)
+	end
+	table.insert(parts, module_name .. '.cpp')
+	return table.concat(parts, '/')
+end
+
+--- Default tests directory function.
+--- Computes the base directory for test files.
+--- @param project_root string Absolute path to the project root directory
+--- @return string Tests directory path (e.g., "/project/tests")
+function M.tests_dir(project_root)
+	return project_root .. "/tests"
 end
 
 M.create_class = {}
