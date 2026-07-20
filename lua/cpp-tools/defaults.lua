@@ -44,7 +44,7 @@ M.create_class = {}
 --- @return string Absolute path to the project root
 function M.get_project_root()
 	local markers = { ".git", "CMakeLists.txt", "Makefile", ".clangd" }
-	local root = vim.fs.root(0, markers)
+	local root = vim.fs.root(0, {markers})
 	if root == nil then
 		error("Could not find project root. None of the markers found: " .. table.concat(markers, ", "))
 	end
