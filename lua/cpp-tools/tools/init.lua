@@ -9,6 +9,11 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command("CppCreateClass", function()
 		require("cpp-tools.tools.create-class").run()
 	end, {})
+
+	-- Register :CppAddGTest command
+	vim.api.nvim_create_user_command("CppAddGTest", function()
+		require("cpp-tools.tools.add-gtest").run()
+	end, {})
 end
 
 return M

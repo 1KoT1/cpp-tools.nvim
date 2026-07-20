@@ -55,6 +55,15 @@ local defaults = {
 			--- Writes the source file directly at source_path. Default implements an
 			--- #include directive, namespace wrapping, and empty constructor/destructor stubs.
 			fill_source_content_fn = defaults_f.create_class.fill_source_content,
+		},
+
+		add_gtest = {
+			--- Custom function to generate and write the Google Test source file content.
+			--- Signature: (header_relative_path: string, module_namespaces: string[], module_name: string, full_test_path: string) -> nil
+			--- Writes the test file directly at full_test_path. Default implements
+			--- an #include of the class header, gtest include, namespace wrapping,
+			--- and a simple TEST() stub.
+			fill_test_content_fn = defaults_f.add_gtest.fill_test_content,
 		}
 	},
 }

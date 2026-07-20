@@ -1,6 +1,47 @@
 
 local M = {}
 
+M.add_gtest = {}
+
+--- Default Google Test source content generation function.
+--- Generates a C++ source file with #include of the class header, gtest include,
+--- namespace wrapping, and a simple TEST() stub.
+--- @param header_relative_path string Path for the #include directive (e.g. "ns1/ns2/MyClass.h")
+--- @param module_namespaces string[] Namespace parts from the module name
+--- @param module_name string The test suite name (last component of module name)
+--- @param full_test_path string Absolute path to write the test file
+function M.add_gtest.fill_test_content(header_relative_path, module_namespaces, module_name, full_test_path)
+	local lines = {}
+	table.insert(lines, '#include "' .. header_relative_path .. '"')
+	table.insert(lines, "")
+	table.insert(lines, '#include <gtest/gtest.h>')
+	table.insert(lines, "")
+
+	-- Opening namespace blocks
+	for _, ns in ipairs(module_namespaces) do
+		table.insert(lines, "namespace " .. ns .. " {")
+	end
+	if #module_namespaces > 0 then
+		table.insert(lines, "")
+	end
+
+	-- Test stub
+	table.insert(lines, "TEST(" .. module_name .. ", Test1) {")
+	table.insert(lines, "\t// TODO: implement test")
+	table.insert(lines, "}")
+
+	-- Closing namespace blocks (reverse order)
+	if #module_namespaces > 0 then
+		table.insert(lines, "")
+		for i = #module_namespaces, 1, -1 do
+			table.insert(lines, "}  // namespace " .. module_namespaces[i])
+		end
+	end
+
+	table.insert(lines, "")
+	vim.fn.writefile(lines, full_test_path)
+end
+
 --- Default header relative path function.
 --- Computes path relative to the headers directory.
 --- @param namespaces string[] List of namespace names

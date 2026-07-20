@@ -124,6 +124,12 @@ for name, fn in pairs(cmake_integration_tests) do
 	tests[name] = fn
 end
 
+-- Load add-gtest tests
+local add_gtest_tests = dofile(test_dir .. "add_gtest_spec.lua")
+for name, fn in pairs(add_gtest_tests) do
+	tests[name] = fn
+end
+
 -- Run tests
 local failed_tests = {}
 print("Running cpp-tools.nvim tests...")
