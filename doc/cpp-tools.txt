@@ -7,7 +7,13 @@ CONTENTS                                                     *cpp-tools*
   2. Installation .................... |cpp-tools-installation|
   3. Mapping ......................... |cpp-tools-mapping|
   4. Tools ........................... |cpp-tools-tools|
+    4.1  Create Class ............... |cpp-tools-create-class|
+    4.2  Add Google Test ............ |cpp-tools-add-gtest|
   5. Customisation ................... |cpp-tools-customisation|
+    5.1  Common options ............. |customisation-common|
+    5.2  Create Class ............... |customisation-create-class|
+    5.3  Add Google Test ............ |customisation-add-gtest|
+    5.4  CMake Integration .......... |customisation-cmake-integration|
   6. Dependencies .................... |cpp-tools-dependencies|
   7. Commands ........................ |cpp-tools-commands|
 
@@ -18,6 +24,7 @@ cpp-tools.nvim is a Neovim plugin that provides a collection of useful tools
 for C++ development. It includes utilities for:
 
 - Creating C++ class skeletons with header and source files
+- Generating Google Test source files for existing C++ classes
 
 ==============================================================================
 2. INSTALLATION                                   *cpp-tools-installation*
@@ -44,10 +51,11 @@ Using packer.nvim:
 3. MAPPING                                           *cpp-tools-mapping*
 
 The plugin intentionally does not define any keymaps to avoid conflicts with
-your existing configuration. A common mapping is:
+your existing configuration. Common mappings are:
 
 >
   vim.keymap.set("n", "<leader>c", ":CppCreateClass<CR>")
+  vim.keymap.set("n", "<leader>t", ":CppAddGTest<CR>")
 
 ==============================================================================
 4. TOOLS                                             *cpp-tools-tools*
@@ -84,6 +92,36 @@ selected CMake target.
 
 Customisation: You can adapt path resolution and generated file content to
 your project style. See |cpp-tools-customisation-create-class|.
+
+4.2  Add Google Test                                          *cpp-tools-add-gtest*
+:CppAddGTest                                                     *:CppAddGTest*
+
+Why: Quickly generate a Google Test source file for an existing C++ class.
+
+Usage: Open a C++ file, place the cursor on or inside the class you want to
+test, and run |:CppAddGTest|. The tool detects the class under the cursor and
+asks you for the test module name.
+
+The default module name is `<namespace>::<ClassName>Tests`. 
+
+For example, with the cursor on a class `ns1::ns2::MyClass`, the default
+module name is `ns1::ns2::MyClassTests`. After confirmation the tool creates:
+
+>
+    <tests_dir>/<class_namespaces>/<module_name>.cpp
+<
+
+With default settings this becomes:
+
+>
+    tests/ns1/ns2/MyClassTests.cpp
+<
+
+After creating the file, the command opens it for editing. If the project uses
+CMake, the new source file is automatically added to the selected CMake target.
+
+Customisation: You can adapt the generated test content to your project style.
+See |cpp-tools-customisation-add-gtest|.
 
 ==============================================================================
 5. CUSTOMISATION                                     *cpp-tools-customisation*
@@ -150,7 +188,30 @@ For the Create Class tool you can additionally override content generation.
 
 Create Class also uses the |customisation-common| options above.
 
-5.3  CMake Integration               *customisation-cmake-integration*
+5.3  Add Google Test                          *customisation-add-gtest*
+
+For the Add Google Test tool you can additionally override the test file
+content generation.
+
+- `fill_test_content_fn(header_relative_path, module_namespaces, module_name, full_test_path) -> nil`
+  Generates and writes the Google Test source file content.
+  `header_relative_path` is the relative path to the class header for the
+  `#include` directive (e.g. `"ns1/ns2/MyClass.h"`).
+  `module_namespaces` are the namespace parts parsed from the module name
+  (e.g. `{"ns1", "ns2"}`).
+  `module_name` is the last component of the module name, used as the `TEST()`
+  suite name.
+  Must write the final content directly to `full_test_path`. You do not need
+  to create the parent directory; the tool creates it automatically.
+  Default:
+  `require("cpp-tools.defaults").add_gtest.fill_test_content`
+  — generates an `#include` of the class header, `#include <gtest/gtest.h>`,
+  namespace wrapping, and a simple `TEST()` stub.
+
+Add Google Test also uses the |customisation-common| options above.
+
+
+5.4  CMake Integration               *customisation-cmake-integration*
 
 The Create Class tool can automatically add new source files to a CMake target.
 
