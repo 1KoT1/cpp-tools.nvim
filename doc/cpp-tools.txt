@@ -8,7 +8,8 @@ CONTENTS                                                     *cpp-tools*
   3. Mapping ......................... |cpp-tools-mapping|
   4. Tools ........................... |cpp-tools-tools|
   5. Customisation ................... |cpp-tools-customisation|
-  6. Commands ........................ |cpp-tools-commands|
+  6. Dependencies .................... |cpp-tools-dependencies|
+  7. Commands ........................ |cpp-tools-commands|
 
 ==============================================================================
 1. INTRODUCTION                                   *cpp-tools-introduction*
@@ -78,6 +79,9 @@ With default settings:
 After creating the files, the command removes the `create class …` line from the
 buffer and opens the fresh header file for editing.
 
+If the project uses CMake, the new source file is automatically added to the
+selected CMake target.
+
 Customisation: You can adapt path resolution and generated file content to
 your project style. See |cpp-tools-customisation-create-class|.
 
@@ -146,6 +150,21 @@ For the Create Class tool you can additionally override content generation.
 
 Create Class also uses the |customisation-common| options above.
 
+5.3  CMake Integration               *customisation-cmake-integration*
+
+The Create Class tool can automatically add new source files to a CMake target.
+
+- `enable_cmake_integration` (boolean)
+  Enables or disables the automatic CMake integration. When enabled, after
+  creating a source file the tool searches for an appropriate CMake target
+  and appends the file to its source list.
+  Default: `true`
+
+The CMake integration optionally supports |cmake-tools.nvim|. If the plugin is
+installed, its active build directory and selected target are used. Without
+it, the plugin falls back to well-known build directory names (`build`,
+`cmake-build-*`, etc.) and request a user to choice a target.
+
 Example:
 >
   require("cpp-tools").setup({
@@ -177,6 +196,17 @@ Example:
   })
 <
 
+
+==============================================================================
+6. DEPENDENCIES                                    *cpp-tools-dependencies*
+
+The plugin has no hard dependencies.
+
+- |cmake-tools.nvim| (optional)
+  If installed, the CMake integration in the Create Class tool uses its active
+  build directory and selected target. Without it, the plugin falls back to
+  well-known build directory names (`build`, `cmake-build-*`, etc.) and request
+  a user to choice a target.
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:

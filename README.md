@@ -32,6 +32,16 @@ The plugin intentionally does not define any keymaps to avoid conflicts with you
 vim.keymap.set("n", "<Leader>c", "<cmd>CppCreateClass<CR>", { desc = "Create C++ class" })
 ```
 
+## Plugin dependencies
+
+The plugin has no hard dependencies.
+
+- [cmake-tools.nvim](https://github.com/CivitasV/cmake-tools.nvim) (optional)
+  If installed, the CMake integration in the Create Class tool uses its active
+  build directory and selected target. Without it, the plugin falls back to
+  well-known build directory names (`build`, `cmake-build-*`, etc.) and request
+  a user to choice a target.
+
 ## Tools
 
 ### Create Class
@@ -65,6 +75,8 @@ src/ns1/ns2/MyClass.cpp
 ```
 
 After creating the files, the command removes the `create class …` line from the buffer and opens the fresh header file for editing.
+
+If the project uses CMake, the new source file is automatically added to the selected CMake target.
 
 **Customisation:** You can adapt path resolution and generated file content to your project style. See [Customisation — Create Class](#customisation-create-class).
 
@@ -117,6 +129,21 @@ For the Create Class tool you can additionally override content generation.
   - You can see an example at a default implementation: [`fill_source_content`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua) — generates an `#include` directive, namespace wrapping, and empty constructor/destructor stubs.
 
 Create Class also uses the [Common options](#common-options) above.
+
+### CMake Integration
+
+The Create Class tool can automatically add new source files to a CMake target.
+
+- `enable_cmake_integration` (boolean)
+  Enables or disables the automatic CMake integration. When enabled, after
+  creating a source file the tool searches for an appropriate CMake target
+  and appends the file to its source list.
+  Default: `true`
+
+The CMake integration optionally supports [cmake-tools.nvim](https://github.com/CivitasV/cmake-tools.nvim).
+If the plugin is installed, its active build directory and selected target are
+used. Without it, the plugin falls back to well-known build directory names
+(`build`, `cmake-build-*`, etc.) and request a user to choice a target.
 
 Example:
 
