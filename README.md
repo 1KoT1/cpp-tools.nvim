@@ -114,23 +114,21 @@ These callbacks are shared across tools and control project layout and root dete
 
 - `header_relative_path_fn(namespaces, class_name) -> string`
   - Computes the path of the header relative to the headers base directory.
-  - Must return a string such as `"ns1/ns2/MyClass.h"`. Usually used in the #include directive. 
+  - Must return a string such as `"ns1/ns2/MyClass.h"`. This value is intended
+    for use in `#include` directives inside source files.
   - You can see an example at a default implementation: [`header_relative_path`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
 
 - `headers_dir_fn(project_root) -> string`
   - Computes the absolute path to the headers base directory.
-  - Must return a string representing an absolute directory path, for example `"/project/includes"`.
+  - Must return a string representing an absolute directory path, for example
+    `"/project/includes"`. This directory is typically passed to CMake, for
+    example in `include_directories()` or `target_include_directories()`.
   - You can see an example at a default implementation: [`headers_dir`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
 
-- `source_relative_path_fn(namespaces, class_name) -> string`
-  - Computes the path of the source file relative to the sources base directory.
-  - Must return a string such as `"ns1/ns2/MyClass.cpp"`.
-  - You can see an example at a default implementation: [`source_relative_path`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
-
-- `sources_dir_fn(project_root) -> string`
-  - Computes the absolute path to the sources base directory.
-  - Must return a string representing an absolute directory path, for example `"/project/src"`.
-  - You can see an example at a default implementation: [`sources_dir`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
+- `source_path_fn(project_root, namespaces, class_name) -> string`
+  - Computes the absolute path to a source file.
+  - Must return a string such as `"/project/src/ns1/ns2/MyClass.cpp"`.
+  - You can see an example at a default implementation: [`source_path`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
 
 - `test_relative_path_fn(namespaces, module_name) -> string`
   - Computes the path of the test file relative to the tests base directory.
@@ -206,11 +204,8 @@ require("cpp-tools").setup({
     headers_dir_fn = function(project_root)
       return project_root .. "/include"
     end,
-    source_relative_path_fn = function(namespaces, class_name)
-      return table.concat(namespaces, "/") .. "/" .. class_name .. ".cpp"
-    end,
-    sources_dir_fn = function(project_root)
-      return project_root .. "/lib"
+    source_path_fn = function(project_root, namespaces, class_name)
+      return project_root .. "/lib/" .. table.concat(namespaces, "/") .. "/" .. class_name .. ".cpp"
     end,
     get_project_root_fn = function()
       return "/absolute/path/to/project"

@@ -108,9 +108,7 @@ function M.run()
 	end
 
 	-- Resolve source file path
-	local source_relative = config.customisations.source_relative_path_fn(namespaces, class_name)
-	local source_dir = config.customisations.sources_dir_fn(project_root)
-	local source_path = source_dir .. "/" .. source_relative
+	local source_path = config.customisations.source_path_fn(project_root, namespaces, class_name)
 
 	-- Create directories for source file if needed
 	local source_parent_dir = vim.fn.fnamemodify(source_path, ":h")

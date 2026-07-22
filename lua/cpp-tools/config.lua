@@ -25,15 +25,10 @@ local defaults = {
 		--- Returns e.g. "/project/includes"
 		headers_dir_fn = defaults_f.headers_dir,
 
-		--- Custom function to compute path relative to the sources directory.
-		--- Signature: (namespaces: string[], class_name: string) -> string
-		--- Returns e.g. "ns1/ns2/ClassName.cpp"
-		source_relative_path_fn = defaults_f.source_relative_path,
-
-		--- Custom function to compute the sources base directory.
-		--- Signature: (project_root: string) -> string
-		--- Returns e.g. "/project/src"
-		sources_dir_fn = defaults_f.sources_dir,
+		--- Custom function to compute the absolute path to a source file.
+		--- Signature: (project_root: string, namespaces: string[], class_name: string) -> string
+		--- Returns e.g. "/project/src/ns1/ns2/ClassName.cpp"
+		source_path_fn = defaults_f.source_path,
 
 		--- Custom function to compute path relative to the tests directory.
 		--- Signature: (namespaces: string[], module_name: string) -> string

@@ -61,12 +61,8 @@ function tests.test_config_defaults_with_one_replace()
 		"headers_dir_fn should be the default function"
 	)
 	assert(
-		config.options.customisations.source_relative_path_fn == defaults_f.source_relative_path,
-		"source_relative_path_fn should be the default function"
-	)
-	assert(
-		config.options.customisations.sources_dir_fn == defaults_f.sources_dir,
-		"sources_dir_fn should be the default function"
+		config.options.customisations.source_path_fn == defaults_f.source_path,
+		"source_path_fn should be the default function"
 	)
 	assert(
 		config.options.customisations.create_class.fill_header_content_fn == defaults_f.create_class.fill_header_content,

@@ -86,6 +86,16 @@ function M.sources_dir(project_root)
 	return project_root .. "/src"
 end
 
+--- Default source file path function.
+--- Computes the absolute path to a source file.
+--- @param project_root string Absolute path to the project root directory
+--- @param namespaces string[] List of namespace names
+--- @param class_name string The class name
+--- @return string Absolute source file path (e.g., "/project/src/ns1/ns2/ClassName.cpp")
+function M.source_path(project_root, namespaces, class_name)
+	return M.sources_dir(project_root) .. "/" .. M.source_relative_path(namespaces, class_name)
+end
+
 --- Default test relative path function.
 --- Computes path relative to the tests directory.
 --- @param namespaces string[] List of namespace parts

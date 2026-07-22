@@ -291,7 +291,7 @@ function tests.test_customisation_headers_dir_fn()
 	end)
 end
 
-function tests.test_customisation_sources_dir_fn()
+function tests.test_customisation_source_path_fn()
 	-- ── Environment preparation ──
 
 	-- Auto-cleaned temporary directory acts as the sample project root.
@@ -305,13 +305,13 @@ function tests.test_customisation_sources_dir_fn()
 		--    discovers the .git marker from the current working directory.
 		vim.fn.chdir(project_root)
 
-		-- Initialise the plugin with repalce by custom
+		-- Initialise the plugin with replace by custom
 		local cpp_tools = require("cpp-tools")
 		cpp_tools.setup({
 			customisations = {
-				-- Custom sources directory: "<root>/my_sources" instead of "src".
-				sources_dir_fn = function(project_root)
-					return project_root .. "/my_sources"
+				-- Custom source path: "<root>/my_sources/<namespaces>/MyClass.cpp"
+				source_path_fn = function(project_root, namespaces, class_name)
+					return project_root .. "/my_sources/" .. table.concat(namespaces, "/") .. "/" .. class_name .. ".cpp"
 				end,
 			},
 		})
@@ -321,29 +321,29 @@ function tests.test_customisation_sources_dir_fn()
 		vim.api.nvim_set_current_buf(buf)
 
 		-- ── Test scenario execution ──
-		vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "create class MyClass" })
+		vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "create class ns1::ns2::MyClass" })
 		vim.api.nvim_win_set_cursor(0, { 1, 0 })
 		vim.cmd("CppCreateClass")
 
 		-- The command must remove the declaration line from the buffer
 		assert(
-			vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1] ~= "create class MyClass",
+			vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1] ~= "create class ns1::ns2::MyClass",
 			"Buffer line should be removed after class creation"
 		)
 
 		-- ── Result verification ──
 		assert(
-			vim.fn.filereadable(project_root .. "/my_sources/MyClass.cpp") == 1,
-			"Source should be created under the custom sources directory"
+			vim.fn.filereadable(project_root .. "/my_sources/ns1/ns2/MyClass.cpp") == 1,
+			"Source should be created under the custom source path"
 		)
 		assert(
-			vim.fn.filereadable(project_root .. "/src/MyClass.cpp") == 0,
+			vim.fn.filereadable(project_root .. "/src/ns1/ns2/MyClass.cpp") == 0,
 			"Source should NOT be created under the default 'src' directory"
 		)
 	end)
 end
 
-function tests.test_customisation_source_relative_path_fn()
+function tests.test_customisation_source_path_fn_relative()
 	-- ── Environment preparation ──
 	with_tmp_dir(function(tmpdir)
 		local project_root = tmpdir
@@ -355,13 +355,13 @@ function tests.test_customisation_source_relative_path_fn()
 		--    discovers the .git marker from the current working directory.
 		vim.fn.chdir(project_root)
 
-		-- Initialise the plugin with repalce by custom
+		-- Initialise the plugin with replace by custom
 		local cpp_tools = require("cpp-tools")
 		cpp_tools.setup({
 			customisations = {
-				-- Custom source relative path: ignore namespaces and place in a custom folder.
-				source_relative_path_fn = function(namespaces, class_name)
-					return "custom/" .. class_name .. ".cpp"
+				-- Custom source path: "<root>/src/custom/MyClass.cpp" instead of default.
+				source_path_fn = function(project_root, namespaces, class_name)
+					return project_root .. "/src/custom/" .. class_name .. ".cpp"
 				end,
 			},
 		})
@@ -384,7 +384,7 @@ function tests.test_customisation_source_relative_path_fn()
 		-- ── Result verification ──
 		assert(
 			vim.fn.filereadable(project_root .. "/src/custom/MyClass.cpp") == 1,
-			"Source should be created under the custom relative path"
+			"Source should be created under the custom source path"
 		)
 		assert(
 			vim.fn.filereadable(project_root .. "/src/MyClass.cpp") == 0,

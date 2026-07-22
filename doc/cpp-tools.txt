@@ -136,26 +136,21 @@ detection. All of them are optional; if omitted, built-in defaults are used.
 
 - `header_relative_path_fn(namespaces, class_name) -> string`
   Computes the path of the header relative to the headers base directory.
-  Must return a string such as `"ns1/ns2/MyClass.h"`. Usually used in the
-	#include directive.
+  Must return a string such as `"ns1/ns2/MyClass.h"`. This value is intended
+  for use in `#include` directives inside source files.
   Default: `require("cpp-tools.defaults").header_relative_path`
 
 - `headers_dir_fn(project_root) -> string`
   Computes the absolute path to the headers base directory.
   Must return a string representing an absolute directory path, for example
-  `"/project/includes"`.
+  `"/project/includes"`. This directory is typically passed to CMake, for
+  example in `include_directories()` or `target_include_directories()`.
   Default: `require("cpp-tools.defaults").headers_dir`
 
-- `source_relative_path_fn(namespaces, class_name) -> string`
-  Computes the path of the source file relative to the sources base directory.
-  Must return a string such as `"ns1/ns2/MyClass.cpp"`.
-  Default: `require("cpp-tools.defaults").source_relative_path`
-
-- `sources_dir_fn(project_root) -> string`
-  Computes the absolute path to the sources base directory.
-  Must return a string representing an absolute directory path, for example
-  `"/project/src"`.
-  Default: `require("cpp-tools.defaults").sources_dir`
+- `source_path_fn(project_root, namespaces, class_name) -> string`
+  Computes the absolute path to a source file.
+  Must return a string such as `"/project/src/ns1/ns2/MyClass.cpp"`.
+  Default: `require("cpp-tools.defaults").source_path`
 
  - `test_relative_path_fn(namespaces, module_name) -> string`
    Computes the path of the test file relative to the tests base directory.
@@ -249,11 +244,8 @@ Example:
       headers_dir_fn = function(project_root)
         return project_root .. "/include"
       end,
-      source_relative_path_fn = function(namespaces, class_name)
-        return table.concat(namespaces, "/") .. "/" .. class_name .. ".cpp"
-      end,
-      sources_dir_fn = function(project_root)
-        return project_root .. "/lib"
+      source_path_fn = function(project_root, namespaces, class_name)
+        return project_root .. "/lib/" .. table.concat(namespaces, "/") .. "/" .. class_name .. ".cpp"
       end,
       get_project_root_fn = function()
         return "/absolute/path/to/project"
@@ -268,8 +260,7 @@ Example:
       },
     },
   })
-<
-
+```
 
 ==============================================================================
 6. DEPENDENCIES                                    *cpp-tools-dependencies*
