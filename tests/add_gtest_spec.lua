@@ -522,9 +522,6 @@ function tests.test_add_gtest_run_custom_module_name()
 				get_project_root_fn = function()
 					return project_root
 				end,
-				test_path_fn = function(project_root_arg, namespaces, module_name)
-					return project_root_arg .. "/custom_tests/" .. module_name .. ".cpp"
-				end,
 				add_gtest = {
 					prompt_module_name_fn = function(default_value)
 						return "MyCustomModule"
@@ -547,7 +544,7 @@ function tests.test_add_gtest_run_custom_module_name()
 			"Expected captured module_name 'MyCustomModule', got: " .. tostring(captured_module_name)
 		)
 
-		local expected_test_path = project_root .. "/custom_tests/MyCustomModule.cpp"
+		local expected_test_path = project_root .. "/tests/MyCustomModule.cpp"
 		assert(
 			vim.fn.filereadable(expected_test_path) == 1,
 			"Test file should exist at custom path: " .. expected_test_path
@@ -555,4 +552,52 @@ function tests.test_add_gtest_run_custom_module_name()
 	end)
 end
 
+function tests.test_add_gtest_run_custom_module_name_whith_naspaces()
+	-- ── Environment preparation ──
+	with_tmp_dir(function(tmpdir)
+		local project_root = tmpdir
+		vim.fn.mkdir(project_root .. "/.git", "p")
+		vim.fn.chdir(project_root)
+
+		create_cpp_buffer({ "class MyClass {", "public:", "	MyClass();", "};" })
+		vim.api.nvim_win_set_cursor(0, { 1, 6 })
+
+		local cpp_tools = require("cpp-tools")
+		local captured_module_name = nil
+
+		cpp_tools.setup({
+			enable_cmake_integration = false,
+			customisations = {
+				get_project_root_fn = function()
+					return project_root
+				end,
+				add_gtest = {
+					prompt_module_name_fn = function(default_value)
+						return "Ns1::Ns2::Ns3::MyCustomModule"
+					end,
+					fill_test_content_fn = function(header_relative, module_namespaces, module_name, full_test_path)
+						captured_module_name = module_name
+						vim.fn.writefile({ "// custom test" }, full_test_path)
+					end,
+				},
+			},
+		})
+
+		-- ── Test scenario execution ──
+		local add_gtest = require("cpp-tools.tools.add-gtest")
+		add_gtest.run()
+
+		-- ── Result verification ──
+		assert(
+			captured_module_name == "MyCustomModule",
+			"Expected captured module_name 'MyCustomModule', got: " .. tostring(captured_module_name)
+		)
+
+		local expected_test_path = project_root .. "/tests/Ns1/Ns2/Ns3/MyCustomModule.cpp"
+		assert(
+			vim.fn.filereadable(expected_test_path) == 1,
+			"Test file should exist at custom path: " .. expected_test_path
+		)
+	end)
+end
 return tests

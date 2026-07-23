@@ -90,7 +90,7 @@ function M.run()
 	-- 8. Compute the test file path using configurable path function
 	local test_path = config.customisations.test_path_fn(
 		project_root,
-		class_namespaces or {},
+		module_namespaces,
 		module_name
 	)
 
