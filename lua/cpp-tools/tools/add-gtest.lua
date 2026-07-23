@@ -87,13 +87,12 @@ function M.run()
 		class_namespaces or {}, class_name or ""
 	)
 
-	-- 8. Compute the test file path using configurable path functions
-	local test_rel = config.customisations.test_relative_path_fn(
+	-- 8. Compute the test file path using configurable path function
+	local test_path = config.customisations.test_path_fn(
+		project_root,
 		class_namespaces or {},
 		module_name
 	)
-	local tests_dir = config.customisations.tests_dir_fn(project_root)
-	local test_path = tests_dir .. "/" .. test_rel
 
 	-- 9. Create the tests directory if needed
 	local test_parent_dir = vim.fn.fnamemodify(test_path, ":h")

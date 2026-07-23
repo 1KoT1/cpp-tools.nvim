@@ -130,17 +130,13 @@ These callbacks are shared across tools and control project layout and root dete
   - Must return a string such as `"/project/src/ns1/ns2/MyClass.cpp"`.
   - You can see an example at a default implementation: [`source_path`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
 
-- `test_relative_path_fn(namespaces, module_name) -> string`
-  - Computes the path of the test file relative to the tests base directory.
+- `test_path_fn(project_root, namespaces, module_name) -> string`
+  - Computes the absolute path to a test file.
+  - `project_root` is the absolute path to the project root directory.
   - `namespaces` are the namespace parts from the test module name (e.g. `{"ns1", "ns2"}`).
   - `module_name` is the last component of the test module name (e.g. `"MyClassTests"`).
-  - Must return a string such as `"ns1/ns2/MyClassTests.cpp"`.
-  - You can see an example at a default implementation: [`test_relative_path`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
-
-- `tests_dir_fn(project_root) -> string`
-  - Computes the absolute path to the tests base directory.
-  - Must return a string representing an absolute directory path, for example `"/project/tests"`.
-  - You can see an example at a default implementation: [`tests_dir`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
+  - Must return a string such as `"/project/tests/ns1/ns2/MyClassTests.cpp"`.
+  - You can see an example at a default implementation: [`test_path`](https://github.com/1KoT1/cpp-tools.nvim/blob/main/lua/cpp-tools/defaults.lua)
 
 - `get_project_root_fn() -> string`
   - Determines the project root directory.

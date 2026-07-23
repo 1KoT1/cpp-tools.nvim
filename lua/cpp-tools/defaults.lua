@@ -96,26 +96,19 @@ function M.source_path(project_root, namespaces, class_name)
 	return M.sources_dir(project_root) .. "/" .. M.source_relative_path(namespaces, class_name)
 end
 
---- Default test relative path function.
---- Computes path relative to the tests directory.
+--- Default test file path function.
+--- Computes the absolute path to a test file.
+--- @param project_root string Absolute path to the project root directory
 --- @param namespaces string[] List of namespace parts
 --- @param module_name string The test module name (last component)
---- @return string Relative path (e.g., "ns1/ns2/MyClassTests.cpp")
-function M.test_relative_path(namespaces, module_name)
-	local parts = {}
+--- @return string Absolute test file path (e.g., "/project/tests/ns1/ns2/MyClassTests.cpp")
+function M.test_path(project_root, namespaces, module_name)
+	local rel_parts = {}
 	for _, ns in ipairs(namespaces) do
-		table.insert(parts, ns)
+		table.insert(rel_parts, ns)
 	end
-	table.insert(parts, module_name .. '.cpp')
-	return table.concat(parts, '/')
-end
-
---- Default tests directory function.
---- Computes the base directory for test files.
---- @param project_root string Absolute path to the project root directory
---- @return string Tests directory path (e.g., "/project/tests")
-function M.tests_dir(project_root)
-	return project_root .. "/tests"
+	table.insert(rel_parts, module_name .. '.cpp')
+	return project_root .. "/tests/" .. table.concat(rel_parts, '/')
 end
 
 M.create_class = {}

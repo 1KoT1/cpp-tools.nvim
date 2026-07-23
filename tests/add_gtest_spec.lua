@@ -129,108 +129,65 @@ function tests.test_add_gtest_content_without_namespaces()
 	end)
 end
 
-function tests.test_default_test_relative_path()
+function tests.test_default_test_path()
 	-- ── Environment preparation ──
 	local defaults = require("cpp-tools.defaults")
 
 	-- ── Test scenario execution ──
-	local rel = defaults.test_relative_path({ "ns1", "ns2" }, "MyClassTests")
+	local path = defaults.test_path("/project", { "ns1", "ns2" }, "MyClassTests")
 
 	-- ── Result verification ──
 	assert(
-		rel == "ns1/ns2/MyClassTests.cpp",
-		"test_relative_path should produce 'ns1/ns2/MyClassTests.cpp', got: " .. tostring(rel)
+		path == "/project/tests/ns1/ns2/MyClassTests.cpp",
+		"test_path should produce '/project/tests/ns1/ns2/MyClassTests.cpp', got: " .. tostring(path)
 	)
 end
 
-function tests.test_default_test_relative_path_without_namespaces()
+function tests.test_default_test_path_without_namespaces()
 	-- ── Environment preparation ──
 	local defaults = require("cpp-tools.defaults")
 
 	-- ── Test scenario execution ──
-	local rel = defaults.test_relative_path({}, "SimpleTests")
+	local path = defaults.test_path("/project", {}, "SimpleTests")
 
 	-- ── Result verification ──
 	assert(
-		rel == "SimpleTests.cpp",
-		"test_relative_path without namespaces should produce 'SimpleTests.cpp', got: " .. tostring(rel)
+		path == "/project/tests/SimpleTests.cpp",
+		"test_path without namespaces should produce '/project/tests/SimpleTests.cpp', got: " .. tostring(path)
 	)
 end
 
-function tests.test_default_tests_dir()
-	-- ── Environment preparation ──
-	local defaults = require("cpp-tools.defaults")
-
-	-- ── Test scenario execution ──
-	local dir = defaults.tests_dir("/project")
-
-	-- ── Result verification ──
-	assert(
-		dir == "/project/tests",
-		"tests_dir should produce '/project/tests', got: " .. tostring(dir)
-	)
-end
-
-function tests.test_customisation_test_relative_path_fn_in_config()
+function tests.test_customisation_test_path_fn_in_config()
 	-- ── Environment preparation ──
 	-- Use a fresh config module for isolation
 	local config = require("cpp-tools.config")
 
-	local custom_fn = function(namespaces, module_name)
-		return "custom-test/" .. (#namespaces > 0 and table.concat(namespaces, '/') .. '/' or "") .. module_name .. ".cpp"
+	local custom_fn = function(project_root, namespaces, module_name)
+		return project_root .. "/custom-test/" .. (#namespaces > 0 and table.concat(namespaces, '/') .. '/' or "") .. module_name .. ".cpp"
 	end
 
 	-- ── Test scenario execution ──
 	config.setup({
 		customisations = {
-			test_relative_path_fn = custom_fn,
+			test_path_fn = custom_fn,
 		},
 	})
 
 	-- ── Result verification ──
 	assert(
-		config.options.customisations.test_relative_path_fn == custom_fn,
-		"test_relative_path_fn should be the custom function"
+		config.options.customisations.test_path_fn == custom_fn,
+		"test_path_fn should be the custom function"
 	)
 
 	-- Verify it works as expected
-	local rel = config.options.customisations.test_relative_path_fn({ "ns1", "ns2" }, "MyClassTests")
+	local path = config.options.customisations.test_path_fn("/project", { "ns1", "ns2" }, "MyClassTests")
 	assert(
-		rel == "custom-test/ns1/ns2/MyClassTests.cpp",
-		"custom function should produce 'custom-test/ns1/ns2/MyClassTests.cpp', got: " .. tostring(rel)
+		path == "/project/custom-test/ns1/ns2/MyClassTests.cpp",
+		"custom function should produce '/project/custom-test/ns1/ns2/MyClassTests.cpp', got: " .. tostring(path)
 	)
 end
 
-function tests.test_customisation_tests_dir_fn_in_config()
-	-- ── Environment preparation ──
-	-- Use a fresh config module for isolation
-	local config = require("cpp-tools.config")
-
-	local custom_fn = function(project_root)
-		return project_root .. "/unit-tests"
-	end
-
-	-- ── Test scenario execution ──
-	config.setup({
-		customisations = {
-			tests_dir_fn = custom_fn,
-		},
-	})
-
-	-- ── Result verification ──
-	assert(
-		config.options.customisations.tests_dir_fn == custom_fn,
-		"tests_dir_fn should be the custom function"
-	)
-
-	local dir = config.options.customisations.tests_dir_fn("/project")
-	assert(
-		dir == "/project/unit-tests",
-		"custom tests_dir_fn should produce '/project/unit-tests', got: " .. tostring(dir)
-	)
-end
-
-function tests.test_customisation_test_functions_preserve_defaults()
+function tests.test_customisation_test_path_fn_preserves_other_defaults()
 	-- ── Environment preparation ──
 	local config = require("cpp-tools.config")
 	local defaults_f = require("cpp-tools.defaults")
@@ -238,17 +195,21 @@ function tests.test_customisation_test_functions_preserve_defaults()
 	-- ── Test scenario execution ──
 	config.setup({
 		customisations = {
-			test_relative_path_fn = function(namespaces, module_name)
-				return "custom/" .. module_name .. ".cpp"
+			test_path_fn = function(project_root, namespaces, module_name)
+				return project_root .. "/custom/" .. module_name .. ".cpp"
 			end,
 		},
 	})
 
 	-- ── Result verification ──
-	-- tests_dir_fn must still be the default implementation
+	-- Other customisations must still be the default implementations
 	assert(
-		config.options.customisations.tests_dir_fn == defaults_f.tests_dir,
-		"tests_dir_fn should still be the default function when test_relative_path_fn is overridden"
+		config.options.customisations.source_path_fn == defaults_f.source_path,
+		"source_path_fn should still be the default function when test_path_fn is overridden"
+	)
+	assert(
+		config.options.customisations.headers_dir_fn == defaults_f.headers_dir,
+		"headers_dir_fn should still be the default function when test_path_fn is overridden"
 	)
 end
 
@@ -561,8 +522,8 @@ function tests.test_add_gtest_run_custom_module_name()
 				get_project_root_fn = function()
 					return project_root
 				end,
-				test_relative_path_fn = function(namespaces, module_name)
-					return "custom_tests/" .. module_name .. ".cpp"
+				test_path_fn = function(project_root_arg, namespaces, module_name)
+					return project_root_arg .. "/custom_tests/" .. module_name .. ".cpp"
 				end,
 				add_gtest = {
 					prompt_module_name_fn = function(default_value)
@@ -586,7 +547,7 @@ function tests.test_add_gtest_run_custom_module_name()
 			"Expected captured module_name 'MyCustomModule', got: " .. tostring(captured_module_name)
 		)
 
-		local expected_test_path = project_root .. "/tests/custom_tests/MyCustomModule.cpp"
+		local expected_test_path = project_root .. "/custom_tests/MyCustomModule.cpp"
 		assert(
 			vim.fn.filereadable(expected_test_path) == 1,
 			"Test file should exist at custom path: " .. expected_test_path

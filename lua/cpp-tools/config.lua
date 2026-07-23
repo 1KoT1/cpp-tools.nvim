@@ -30,15 +30,10 @@ local defaults = {
 		--- Returns e.g. "/project/src/ns1/ns2/ClassName.cpp"
 		source_path_fn = defaults_f.source_path,
 
-		--- Custom function to compute path relative to the tests directory.
-		--- Signature: (namespaces: string[], module_name: string) -> string
-		--- Returns e.g. "ns1/ns2/MyClassTests.cpp"
-		test_relative_path_fn = defaults_f.test_relative_path,
-
-		--- Custom function to compute the tests base directory.
-		--- Signature: (project_root: string) -> string
-		--- Returns e.g. "/project/tests"
-		tests_dir_fn = defaults_f.tests_dir,
+		--- Custom function to compute the absolute path to a test file.
+		--- Signature: (project_root: string, namespaces: string[], module_name: string) -> string
+		--- Returns e.g. "/project/tests/ns1/ns2/MyClassTests.cpp"
+		test_path_fn = defaults_f.test_path,
 
 		--- Custom function to determine the project root directory.
 		--- Signature: () -> string
